@@ -87,9 +87,18 @@
                 loadingDiv.style.display = 'none';
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `
-                    <div class="error">
-                        <h2>Missing Authorization Code</h2>
-                        <p>No authorization code was provided in the callback.</p>
+                    <div style="color: #666;">
+                        <h2>OAuth Callback Handler</h2>
+                        <p>This page handles Jobber OAuth callbacks.</p>
+                        <p style="font-size: 0.9rem; margin-top: 20px;">
+                            If you're seeing this message, you either:<br>
+                            • Visited this page directly (which is normal)<br>
+                            • The OAuth redirect didn't include a code parameter
+                        </p>
+                        <p style="font-size: 0.9rem; color: #10b981; margin-top: 20px;">
+                            ✓ The page is working correctly!<br>
+                            It will process the authorization code when redirected from Jobber.
+                        </p>
                     </div>
                 `;
                 return;
@@ -123,10 +132,18 @@
                         </div>
                     `;
                 } else {
+                    // Show detailed error for debugging
+                    const errorDetails = data.error || data.message || 'An error occurred during authorization.';
+                    const statusText = response.statusText || `Status: ${response.status}`;
                     resultDiv.innerHTML = `
                         <div class="error">
                             <h2>Authorization Failed</h2>
-                            <p>${data.error || 'An error occurred during authorization.'}</p>
+                            <p><strong>Error:</strong> ${errorDetails}</p>
+                            <p><strong>${statusText}</strong></p>
+                            <details style="margin-top: 20px; text-align: left; font-size: 0.85rem;">
+                                <summary style="cursor: pointer; color: #666;">Show full error details</summary>
+                                <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; margin-top: 10px;">${JSON.stringify(data, null, 2)}</pre>
+                            </details>
                         </div>
                     `;
                 }
@@ -137,8 +154,12 @@
                     <div class="error">
                         <h2>Network Error</h2>
                         <p>Failed to connect to the server: ${err.message}</p>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                            Check browser console (F12) for more details.
+                        </p>
                     </div>
                 `;
+                console.error('OAuth callback error:', err);
             }
         }
 
